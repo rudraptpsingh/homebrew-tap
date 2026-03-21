@@ -1,17 +1,12 @@
 class Axon < Formula
   desc "Local hardware intelligence for AI coding agents"
   homepage "https://github.com/rudraptpsingh/axon"
-  version "0.1.0"
+  version "0.1.1"
   license "MIT"
 
-  on_macos do
-    if Hardware::CPU.arm?
-      url "https://github.com/rudraptpsingh/axon/releases/download/v#{version}/axon-aarch64-apple-darwin"
-      sha256 "b581eb9a5ad38e1d12b3eb8edb290f00f06ac4061f3a76323b98c8a008951d1e"
-    else
-      url "https://github.com/rudraptpsingh/axon/releases/download/v#{version}/axon-x86_64-apple-darwin"
-      sha256 "feda8c51429385b9939fe88f22a579690f58d7ad8086213c493ff87213279bba"
-    end
+  on_arm do
+    url "https://github.com/rudraptpsingh/axon/releases/download/v#{version}/axon-aarch64-apple-darwin"
+    sha256 "8e6115b7aca8599ae90f0d48303a1883309f4f33b992aae3fc214ea6a0caf4be"
   end
 
   def install

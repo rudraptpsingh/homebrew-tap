@@ -6,7 +6,7 @@ class Axon < Formula
 
   on_arm do
     url "https://github.com/rudraptpsingh/axon/releases/download/v#{version}/axon-aarch64-apple-darwin"
-    sha256 "dfc5d6d2b141f9f6853cf4c52cc9eece972bd5c7b502da0cf7736b50d56b39e5"
+    sha256 "6b8f9fe11d50c046d81fecb07d208b019c105e2857ce87f00a1f025ea8dd4bc4"
   end
 
   def install

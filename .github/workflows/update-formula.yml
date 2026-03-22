@@ -1,0 +1,123 @@
+name: Update Formula
+
+on:
+  repository_dispatch:
+    types: [update-formula]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version (without v prefix)"
+        required: true
+      sha_aarch64_darwin:
+        description: "SHA256 for aarch64-apple-darwin"
+        required: true
+      sha_x86_64_darwin:
+        description: "SHA256 for x86_64-apple-darwin"
+        required: true
+      sha_aarch64_linux:
+        description: "SHA256 for aarch64-unknown-linux-gnu"
+        required: true
+      sha_x86_64_linux:
+        description: "SHA256 for x86_64-unknown-linux-gnu"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    name: Update Formula
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve inputs
+        id: meta
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            echo "version=${{ github.event.client_payload.version }}" >> "$GITHUB_OUTPUT"
+            echo "sha_aarch64_darwin=${{ github.event.client_payload.sha_aarch64_darwin }}" >> "$GITHUB_OUTPUT"
+            echo "sha_x86_64_darwin=${{ github.event.client_payload.sha_x86_64_darwin }}" >> "$GITHUB_OUTPUT"
+            echo "sha_aarch64_linux=${{ github.event.client_payload.sha_aarch64_linux }}" >> "$GITHUB_OUTPUT"
+            echo "sha_x86_64_linux=${{ github.event.client_payload.sha_x86_64_linux }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+            echo "sha_aarch64_darwin=${{ github.event.inputs.sha_aarch64_darwin }}" >> "$GITHUB_OUTPUT"
+            echo "sha_x86_64_darwin=${{ github.event.inputs.sha_x86_64_darwin }}" >> "$GITHUB_OUTPUT"
+            echo "sha_aarch64_linux=${{ github.event.inputs.sha_aarch64_linux }}" >> "$GITHUB_OUTPUT"
+            echo "sha_x86_64_linux=${{ github.event.inputs.sha_x86_64_linux }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate inputs
+        run: |
+          VERSION="${{ steps.meta.outputs.version }}"
+          if [ -z "$VERSION" ]; then
+            echo "[err] version is required"
+            exit 1
+          fi
+          for sha_name in sha_aarch64_darwin sha_x86_64_darwin sha_aarch64_linux sha_x86_64_linux; do
+            val=$(echo "${{ steps.meta.outputs[format('{0}', sha_name)] }}" 2>/dev/null || true)
+          done
+          echo "[ok] version=${VERSION}"
+
+      - name: Generate formula
+        run: |
+          VERSION="${{ steps.meta.outputs.version }}"
+          SHA_AD="${{ steps.meta.outputs.sha_aarch64_darwin }}"
+          SHA_XD="${{ steps.meta.outputs.sha_x86_64_darwin }}"
+          SHA_AL="${{ steps.meta.outputs.sha_aarch64_linux }}"
+          SHA_XL="${{ steps.meta.outputs.sha_x86_64_linux }}"
+          cat > Formula/axon.rb <<RUBY
+          class Axon < Formula
+            desc "Local hardware intelligence for AI coding agents"
+            homepage "https://github.com/rudraptpsingh/axon"
+            version "${VERSION}"
+            license "MIT"
+
+            on_macos do
+              if Hardware::CPU.arm?
+                url "https://github.com/rudraptpsingh/axon/releases/download/v#{version}/axon-aarch64-apple-darwin"
+                sha256 "${SHA_AD}"
+              else
+                url "https://github.com/rudraptpsingh/axon/releases/download/v#{version}/axon-x86_64-apple-darwin"
+                sha256 "${SHA_XD}"
+              end
+            end
+
+            on_linux do
+              if Hardware::CPU.arm?
+                url "https://github.com/rudraptpsingh/axon/releases/download/v#{version}/axon-aarch64-unknown-linux-gnu"
+                sha256 "${SHA_AL}"
+              else
+                url "https://github.com/rudraptpsingh/axon/releases/download/v#{version}/axon-x86_64-unknown-linux-gnu"
+                sha256 "${SHA_XL}"
+              end
+            end
+
+            def install
+              binary = Dir["axon-*"].first
+              mv binary, "axon"
+              chmod 0755, "axon"
+              bin.install "axon"
+            end
+
+            def post_install
+              ohai "axon installed. Restart your AI agent (Claude Desktop, Cursor, VS Code) to activate."
+              ohai "Run 'axon diagnose' to verify."
+            end
+
+            test do
+              assert_match "axon", shell_output("#{bin}/axon --help")
+            end
+          end
+          RUBY
+          cat Formula/axon.rb
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/axon.rb
+          git diff --cached --quiet && echo "[info] No changes" && exit 0
+          git commit -m "Bump axon to v${{ steps.meta.outputs.version }}"
+          git push

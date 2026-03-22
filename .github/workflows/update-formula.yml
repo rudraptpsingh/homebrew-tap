@@ -36,16 +36,16 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
             echo "version=${{ github.event.client_payload.version }}" >> "$GITHUB_OUTPUT"
-            echo "sha_aarch64_darwin=${{ github.event.client_payload.sha_aarch64_darwin }}" >> "$GITHUB_OUTPUT"
-            echo "sha_x86_64_darwin=${{ github.event.client_payload.sha_x86_64_darwin }}" >> "$GITHUB_OUTPUT"
-            echo "sha_aarch64_linux=${{ github.event.client_payload.sha_aarch64_linux }}" >> "$GITHUB_OUTPUT"
-            echo "sha_x86_64_linux=${{ github.event.client_payload.sha_x86_64_linux }}" >> "$GITHUB_OUTPUT"
+            echo "sha_ad=${{ github.event.client_payload.sha_aarch64_darwin }}" >> "$GITHUB_OUTPUT"
+            echo "sha_xd=${{ github.event.client_payload.sha_x86_64_darwin }}" >> "$GITHUB_OUTPUT"
+            echo "sha_al=${{ github.event.client_payload.sha_aarch64_linux }}" >> "$GITHUB_OUTPUT"
+            echo "sha_xl=${{ github.event.client_payload.sha_x86_64_linux }}" >> "$GITHUB_OUTPUT"
           else
             echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
-            echo "sha_aarch64_darwin=${{ github.event.inputs.sha_aarch64_darwin }}" >> "$GITHUB_OUTPUT"
-            echo "sha_x86_64_darwin=${{ github.event.inputs.sha_x86_64_darwin }}" >> "$GITHUB_OUTPUT"
-            echo "sha_aarch64_linux=${{ github.event.inputs.sha_aarch64_linux }}" >> "$GITHUB_OUTPUT"
-            echo "sha_x86_64_linux=${{ github.event.inputs.sha_x86_64_linux }}" >> "$GITHUB_OUTPUT"
+            echo "sha_ad=${{ github.event.inputs.sha_aarch64_darwin }}" >> "$GITHUB_OUTPUT"
+            echo "sha_xd=${{ github.event.inputs.sha_x86_64_darwin }}" >> "$GITHUB_OUTPUT"
+            echo "sha_al=${{ github.event.inputs.sha_aarch64_linux }}" >> "$GITHUB_OUTPUT"
+            echo "sha_xl=${{ github.event.inputs.sha_x86_64_linux }}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Validate inputs
@@ -55,18 +55,16 @@ jobs:
             echo "[err] version is required"
             exit 1
           fi
-          for sha_name in sha_aarch64_darwin sha_x86_64_darwin sha_aarch64_linux sha_x86_64_linux; do
-            val=$(echo "${{ steps.meta.outputs[format('{0}', sha_name)] }}" 2>/dev/null || true)
-          done
           echo "[ok] version=${VERSION}"
 
       - name: Generate formula
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+          SHA_AD: ${{ steps.meta.outputs.sha_ad }}
+          SHA_XD: ${{ steps.meta.outputs.sha_xd }}
+          SHA_AL: ${{ steps.meta.outputs.sha_al }}
+          SHA_XL: ${{ steps.meta.outputs.sha_xl }}
         run: |
-          VERSION="${{ steps.meta.outputs.version }}"
-          SHA_AD="${{ steps.meta.outputs.sha_aarch64_darwin }}"
-          SHA_XD="${{ steps.meta.outputs.sha_x86_64_darwin }}"
-          SHA_AL="${{ steps.meta.outputs.sha_aarch64_linux }}"
-          SHA_XL="${{ steps.meta.outputs.sha_x86_64_linux }}"
           cat > Formula/axon.rb <<RUBY
           class Axon < Formula
             desc "Local hardware intelligence for AI coding agents"

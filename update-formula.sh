@@ -79,7 +79,7 @@ RUBY
 echo "[ok] Formula updated for ${VERSION}"
 echo ""
 echo "Next steps:"
-echo "  cd homebrew-axon"
+echo "  cd homebrew-tap"
 echo "  git add Formula/axon.rb"
 echo "  git commit -m \"Update axon to ${BARE_VERSION}\""
 echo "  git push"

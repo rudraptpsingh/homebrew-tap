@@ -11,10 +11,11 @@ brew install axon
 
 ## After installing
 
-Restart your AI agent (Claude Desktop, Cursor, VS Code). axon auto-configures itself on first run.
+Configure your agents, then restart them:
 
 ```bash
-axon diagnose    # Quick smoke test
+axon setup           # configures all detected agents
+axon diagnose        # quick smoke test
 ```
 
 ## Updating

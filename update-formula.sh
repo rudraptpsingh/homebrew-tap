@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Updates the Homebrew formula with SHA256 checksums from a GitHub release.
-# Usage: ./update-formula.sh v0.1.0
+# Usage: ./update-formula.sh v0.2.0
 
 set -euo pipefail
 
@@ -11,16 +11,24 @@ BARE_VERSION="${VERSION#v}"
 
 echo "[info] Downloading checksums for ${VERSION}..."
 
-ARM64_SHA=$(curl -sL "${BASE_URL}/axon-aarch64-apple-darwin.sha256" | awk '{print $1}')
-X86_64_SHA=$(curl -sL "${BASE_URL}/axon-x86_64-apple-darwin.sha256" | awk '{print $1}')
+ARM64_DARWIN_SHA=$(curl -sL "${BASE_URL}/axon-aarch64-apple-darwin.sha256" | awk '{print $1}')
+X86_64_DARWIN_SHA=$(curl -sL "${BASE_URL}/axon-x86_64-apple-darwin.sha256" | awk '{print $1}')
+ARM64_LINUX_SHA=$(curl -sL "${BASE_URL}/axon-aarch64-unknown-linux-gnu.sha256" | awk '{print $1}')
+X86_64_LINUX_SHA=$(curl -sL "${BASE_URL}/axon-x86_64-unknown-linux-gnu.sha256" | awk '{print $1}')
 
-if [ -z "$ARM64_SHA" ] || [ -z "$X86_64_SHA" ]; then
-  echo "[err] Failed to download checksums. Check that the release exists."
+if [ -z "$ARM64_DARWIN_SHA" ] || [ -z "$X86_64_DARWIN_SHA" ]; then
+  echo "[err] Failed to download macOS checksums. Check that the release exists."
   exit 1
 fi
 
-echo "[info] arm64  SHA256: ${ARM64_SHA}"
-echo "[info] x86_64 SHA256: ${X86_64_SHA}"
+if [ -z "$ARM64_LINUX_SHA" ] || [ -z "$X86_64_LINUX_SHA" ]; then
+  echo "[warn] Linux checksums not found. Formula will include macOS only."
+fi
+
+echo "[info] macOS arm64  SHA256: ${ARM64_DARWIN_SHA}"
+echo "[info] macOS x86_64 SHA256: ${X86_64_DARWIN_SHA}"
+echo "[info] Linux arm64  SHA256: ${ARM64_LINUX_SHA:-missing}"
+echo "[info] Linux x86_64 SHA256: ${X86_64_LINUX_SHA:-missing}"
 
 # Generate fresh formula from template
 cat > "$FORMULA" << RUBY
@@ -33,10 +41,20 @@ class Axon < Formula
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/rudraptpsingh/axon/releases/download/v#{version}/axon-aarch64-apple-darwin"
-      sha256 "${ARM64_SHA}"
+      sha256 "${ARM64_DARWIN_SHA}"
     else
       url "https://github.com/rudraptpsingh/axon/releases/download/v#{version}/axon-x86_64-apple-darwin"
-      sha256 "${X86_64_SHA}"
+      sha256 "${X86_64_DARWIN_SHA}"
+    end
+  end
+
+  on_linux do
+    if Hardware::CPU.arm?
+      url "https://github.com/rudraptpsingh/axon/releases/download/v#{version}/axon-aarch64-unknown-linux-gnu"
+      sha256 "${ARM64_LINUX_SHA}"
+    else
+      url "https://github.com/rudraptpsingh/axon/releases/download/v#{version}/axon-x86_64-unknown-linux-gnu"
+      sha256 "${X86_64_LINUX_SHA}"
     end
   end
 

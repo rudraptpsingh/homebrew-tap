@@ -1,26 +1,26 @@
 class Axon < Formula
   desc "Local hardware intelligence for AI coding agents"
   homepage "https://github.com/rudraptpsingh/axon"
-  version "0.2.1"
+  version "0.2.3"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/rudraptpsingh/axon/releases/download/v#{version}/axon-aarch64-apple-darwin"
-      sha256 "b99a31c489d072fd2bddc20755ec5f4c1d911f7f7fd277f7e04059e24a62a11a"
+      sha256 "228dda764afeabad0d2d4f01fd32c43a9036ae490fe6d4461e3816e46f9ff54a"
     else
       url "https://github.com/rudraptpsingh/axon/releases/download/v#{version}/axon-x86_64-apple-darwin"
-      sha256 "3e8830ff84c15bbca14ae8e43c58ce7658808418a23135b9d9d2d5be1c77fd69"
+      sha256 "b47bc5fdfee5c17e2ca8c07a9ec6c2ad082bd0d7f24c51fec042e04cd66e63ac"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
       url "https://github.com/rudraptpsingh/axon/releases/download/v#{version}/axon-aarch64-unknown-linux-gnu"
-      sha256 "b67007173b5f99970b0f95327eac237ca03473d3e4f6118e2a5d06f3e74ad7fb"
+      sha256 "738b9c9d359cbc535ecd52575981ebe20c720a30c223297539b46bc5667c91ae"
     else
       url "https://github.com/rudraptpsingh/axon/releases/download/v#{version}/axon-x86_64-unknown-linux-gnu"
-      sha256 "044ed79ef1e0e6a2cb33c915c878d02d16cff2119af19f080a906b4860db5346"
+      sha256 "241e82c53c71ead0804a23aa08ec0c0513588dea1db1f213e3d217a971fb64d8"
     end
   end
 

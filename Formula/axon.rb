@@ -7,7 +7,7 @@ class Axon < Formula
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/rudraptpsingh/axon/releases/download/v#{version}/axon-aarch64-apple-darwin"
-      sha256 "f2bb3974f66b726de9b75aea4efd60830f8d0e2ca649e7888e7d969ba7591945"
+      sha256 "8307c7c0992a6700cccca17367343dd851a356a5d0d695891d69a0ea69f5366a"
     else
       url "https://github.com/rudraptpsingh/axon/releases/download/v#{version}/axon-x86_64-apple-darwin"
       sha256 "b47bc5fdfee5c17e2ca8c07a9ec6c2ad082bd0d7f24c51fec042e04cd66e63ac"
